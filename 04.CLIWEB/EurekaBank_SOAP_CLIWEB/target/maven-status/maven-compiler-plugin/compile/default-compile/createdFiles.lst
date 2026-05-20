@@ -1,0 +1,11 @@
+ec\edu\monster\modelo\ResumenVentaLocalidad.class
+ec\edu\monster\modelo\VentaRegistro.class
+ec\edu\monster\modelo\LocalidadPartido.class
+ec\edu\monster\controller\MenuController.class
+ec\edu\monster\modelo\CompraResultado.class
+ec\edu\monster\modelo\PartidoFutbol.class
+ec\edu\monster\controller\OperacionController.class
+ec\edu\monster\controller\ReporteController.class
+ec\edu\monster\service\EurekaWebClient.class
+ec\edu\monster\controller\LoginController.class
+ec\edu\monster\controller\MovimientosController.class

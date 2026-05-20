@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by XML-WS Runtime (https://github.com/eclipse-ee4j/metro-jax-ws). Runtime's version is Eclipse Metro/4.0.3.payara-p1 (metro-4.0.3.payara-maintenance-004e4e3; 2023-11-08T12:59:53+0000) XMLWS-Impl/4.0.2 XMLWS-API/4.0.1 XMLB-Impl/4.0.4 XMLB-API/4.0.1 git-revision#004e4e3. --><xs:schema xmlns:tns="http://ws.monster.edu.ec/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://ws.monster.edu.ec/">
+
+<xs:element name="movimiento" type="tns:movimiento"/>
+
+<xs:element name="regDeposito" type="tns:regDeposito"/>
+
+<xs:element name="regDepositoResponse" type="tns:regDepositoResponse"/>
+
+<xs:element name="regRetiro" type="tns:regRetiro"/>
+
+<xs:element name="regRetiroResponse" type="tns:regRetiroResponse"/>
+
+<xs:element name="regTransferencia" type="tns:regTransferencia"/>
+
+<xs:element name="regTransferenciaResponse" type="tns:regTransferenciaResponse"/>
+
+<xs:element name="traerMovimientos" type="tns:traerMovimientos"/>
+
+<xs:element name="traerMovimientosResponse" type="tns:traerMovimientosResponse"/>
+
+<xs:element name="validarIngreso" type="tns:validarIngreso"/>
+
+<xs:element name="validarIngresoResponse" type="tns:validarIngresoResponse"/>
+
+<xs:complexType name="validarIngreso">
+<xs:sequence>
+<xs:element name="usuario" type="xs:string" minOccurs="0"/>
+<xs:element name="password" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="validarIngresoResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regDeposito">
+<xs:sequence>
+<xs:element name="cuenta" type="xs:string" minOccurs="0"/>
+<xs:element name="importe" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regDepositoResponse">
+<xs:sequence>
+<xs:element name="resultado" type="tns:OperacionCuentaResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="OperacionCuentaResponse">
+<xs:sequence>
+<xs:element name="estado" type="xs:int"/>
+<xs:element name="saldo" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regTransferencia">
+<xs:sequence>
+<xs:element name="cuentaOrigen" type="xs:string" minOccurs="0"/>
+<xs:element name="cuentaDestino" type="xs:string" minOccurs="0"/>
+<xs:element name="importe" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regTransferenciaResponse">
+<xs:sequence>
+<xs:element name="resultado" type="tns:OperacionCuentaResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regRetiro">
+<xs:sequence>
+<xs:element name="cuenta" type="xs:string" minOccurs="0"/>
+<xs:element name="importe" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="regRetiroResponse">
+<xs:sequence>
+<xs:element name="resultado" type="tns:OperacionCuentaResponse" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="traerMovimientos">
+<xs:sequence>
+<xs:element name="cuenta" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="traerMovimientosResponse">
+<xs:sequence>
+<xs:element name="movimiento" type="tns:movimiento" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="movimiento">
+<xs:sequence>
+<xs:element name="accion" type="xs:string" minOccurs="0"/>
+<xs:element name="cuenta" type="xs:string" minOccurs="0"/>
+<xs:element name="fecha" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="importe" type="xs:double"/>
+<xs:element name="nromov" type="xs:int"/>
+<xs:element name="tipo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
