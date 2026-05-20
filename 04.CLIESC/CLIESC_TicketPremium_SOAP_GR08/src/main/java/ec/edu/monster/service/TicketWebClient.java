@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 public final class TicketWebClient {
-  private static final String DEFAULT_ENDPOINT = "http://localhost:8080/WS_TicketPremium_Server/WSFederacion";
+  private static final String DEFAULT_ENDPOINT = "http://localhost:8080/WS_EurekaBank_Server/WSFederacion";
   private static final String NAMESPACE = "http://ws.monster.edu.ec/";
 
   private TicketWebClient() {

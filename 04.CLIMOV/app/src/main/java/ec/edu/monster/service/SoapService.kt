@@ -27,8 +27,8 @@ class SoapService {
         .build()
 
     // 10.0.2.2 es la IP especial del emulador para acceder a localhost
-    private val baseUrlTicketPremium = "http://192.168.100.112:8080/WS_TicketPremium_Server/WSTicketPremium"
-    private val baseUrlFederacion = "http://192.168.100.112:8080/WS_TicketPremium_Server/WSFederacion"
+    private val baseUrlTicketPremium = "http://10.40.69.25:8080/WS_EurekaBank_Server/WSTicketPremium"
+    private val baseUrlFederacion = "http://10.40.69.25:8080/WS_EurekaBank_Server/WSFederacion"
 
     companion object {
         private const val NAMESPACE = "http://ws.monster.edu.ec/"
@@ -45,28 +45,45 @@ class SoapService {
 
     suspend fun validarIngreso(usuario: String, password: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            val soapEnvelope = """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
-                    <S:Body>
-                        <ns2:validarIngreso xmlns:ns2="${NAMESPACE}">
-                            <usuario>$usuario</usuario>
-                            <password>$password</password>
-                        </ns2:validarIngreso>
-                    </S:Body>
-                </S:Envelope>
-            """.trimIndent()
+            // Normalize inputs: trim and uppercase to match server expectations
+            var u = usuario.trim().uppercase()
+            var p = password.trim().uppercase()
 
-            val request = Request.Builder()
-                .url(baseUrlTicketPremium)
-                .post(soapEnvelope.toRequestBody("text/xml; charset=utf-8".toMediaType()))
-                .addHeader("SOAPAction", "")
-                .build()
+            fun call(uCall: String, pCall: String): Boolean {
+                val soapEnvelope = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+                        <S:Body>
+                            <ns2:validarIngreso xmlns:ns2="${NAMESPACE}">
+                                <usuario>$uCall</usuario>
+                                <password>$pCall</password>
+                            </ns2:validarIngreso>
+                        </S:Body>
+                    </S:Envelope>
+                """.trimIndent()
 
-            val response = client.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
+                val request = Request.Builder()
+                    .url(baseUrlTicketPremium)
+                    .post(soapEnvelope.toRequestBody("text/xml; charset=utf-8".toMediaType()))
+                    .addHeader("SOAPAction", "")
+                    .build()
 
-            parseValidarIngresoResponse(responseBody)
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string() ?: ""
+                return parseValidarIngresoResponse(responseBody)
+            }
+
+            // First attempt with normalized input
+            val first = call(u, p)
+            if (first) return@withContext true
+
+            // Fallback: common typo mapping (MOSTER -> MONSTER)
+            if (u == "MOSTER") {
+                val retry = call("MONSTER", p)
+                if (retry) return@withContext true
+            }
+
+            false
         } catch (e: Exception) {
             e.printStackTrace()
             false
