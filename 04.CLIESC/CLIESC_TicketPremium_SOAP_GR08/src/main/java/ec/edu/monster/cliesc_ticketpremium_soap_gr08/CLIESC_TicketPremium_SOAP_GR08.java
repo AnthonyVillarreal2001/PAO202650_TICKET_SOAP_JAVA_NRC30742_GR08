@@ -1,4 +1,4 @@
-package ec.edu.monster.cliesc_TicketPremium_soap_GR08;
+package ec.edu.monster.cliesc_ticketpremium_soap_gr08;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import ec.edu.monster.controller.TicketLoginController;

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+    <S:Body>
+        <ns2:listarLocalidadesDisponibles xmlns:ns2="http://ws.monster.edu.ec/">
+            <codigoPartido>P001</codigoPartido>
+        </ns2:listarLocalidadesDisponibles>
+    </S:Body>
+</S:Envelope>

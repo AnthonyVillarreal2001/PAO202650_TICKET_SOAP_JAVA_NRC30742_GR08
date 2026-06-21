@@ -20,7 +20,7 @@ public class TicketLoginController {
 
       TicketSession.usuario = usuario.trim();
       view.dispose();
-      new TicketMenuController(new TicketMenuView(), TicketSession.usuario).show();
+      new DashboardController(new ec.edu.monster.view.DashboardView()).show();
     });
   }
 

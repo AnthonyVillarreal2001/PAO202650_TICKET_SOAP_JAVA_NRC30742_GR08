@@ -12,6 +12,16 @@
       <filtering>false</filtering>
     </resource>
   </resources>
+  <plugins>
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>exec-maven-plugin</artifactId>
+      <version>3.1.0</version>
+      <configuration>
+        <mainClass>ec.edu.monster.cliesc_ticketpremium_soap_gr08.CLIESC_TicketPremium_SOAP_GR08</mainClass>
+      </configuration>
+    </plugin>
+  </plugins>
 </build>
 
   <properties>

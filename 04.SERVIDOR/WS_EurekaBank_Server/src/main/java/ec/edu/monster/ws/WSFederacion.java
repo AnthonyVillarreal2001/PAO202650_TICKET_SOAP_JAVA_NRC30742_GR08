@@ -11,6 +11,7 @@ import jakarta.jws.WebResult;
 import jakarta.jws.WebService;
 import java.util.ArrayList;
 import java.util.List;
+import ec.edu.monster.modelo.Factura;
 
 @WebService(serviceName = "WSFederacion")
 public class WSFederacion {
@@ -53,10 +54,30 @@ public class WSFederacion {
             @WebParam(name = "codigoPartido") String codigoPartido,
             @WebParam(name = "codigoLocalidad") String codigoLocalidad,
             @WebParam(name = "cantidad") int cantidad,
-            @WebParam(name = "cliente") String cliente) {
+            @WebParam(name = "cliente") String cliente,
+            @WebParam(name = "vendedor") String vendedor) {
         try {
             FederacionService s = new FederacionService();
-            return s.comprarBoleto(codigoPartido, codigoLocalidad, cantidad, cliente);
+            return s.comprarBoleto(codigoPartido, codigoLocalidad, cantidad, cliente, vendedor);
+        } catch (Exception e) {
+            PurchaseResponse r = new PurchaseResponse();
+            r.setEstado(-1);
+            r.setMensaje(e.getMessage());
+            return r;
+        }
+    }
+
+    @WebMethod(operationName = "comprarBoletosMultiples")
+    @WebResult(name = "resultado")
+    public PurchaseResponse comprarBoletosMultiples(
+            @WebParam(name = "codigoPartido") String codigoPartido,
+            @WebParam(name = "codigosLocalidades") String codigosLocalidades,
+            @WebParam(name = "cantidades") String cantidades,
+            @WebParam(name = "cliente") String cliente,
+            @WebParam(name = "vendedor") String vendedor) {
+        try {
+            FederacionService s = new FederacionService();
+            return s.comprarBoletosMultiples(codigoPartido, codigosLocalidades, cantidades, cliente, vendedor);
         } catch (Exception e) {
             PurchaseResponse r = new PurchaseResponse();
             r.setEstado(-1);
@@ -78,4 +99,63 @@ public class WSFederacion {
         }
     }
 
+    @WebMethod(operationName = "listarFacturas")
+    @WebResult(name = "factura")
+    public List<Factura> listarFacturas(@WebParam(name = "idCliente") String idCliente) {
+        try {
+            FederacionService s = new FederacionService();
+            return s.listarFacturas(idCliente);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    @WebMethod(operationName = "obtenerFactura")
+    @WebResult(name = "factura")
+    public Factura obtenerFactura(@WebParam(name = "idFactura") long idFactura) {
+        try {
+            FederacionService s = new FederacionService();
+            return s.obtenerFactura(idFactura);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @WebMethod(operationName = "obtenerDetallesFactura")
+    @WebResult(name = "detalle")
+    public List<ec.edu.monster.modelo.DetalleFactura> obtenerDetallesFactura(@WebParam(name = "idFactura") long idFactura) {
+        try {
+            FederacionService s = new FederacionService();
+            return s.obtenerDetallesFactura(idFactura);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @WebMethod(operationName = "listarTodasLasFacturas")
+    @WebResult(name = "factura")
+    public List<Factura> listarTodasLasFacturas(
+            @WebParam(name = "fecha") String fecha, 
+            @WebParam(name = "vendedor") String vendedor) {
+        try {
+            FederacionService s = new FederacionService();
+            return s.listarTodasLasFacturas(fecha, vendedor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @WebMethod(operationName = "obtenerAsientosOcupados")
+    @WebResult(name = "asientoOcupado")
+    public List<ec.edu.monster.modelo.AsientoOcupado> obtenerAsientosOcupados(@WebParam(name = "codigoPartido") String codigoPartido) {
+        try {
+            return new FederacionService().obtenerAsientosOcupados(codigoPartido);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }

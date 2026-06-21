@@ -5,6 +5,13 @@ public class ResumenVentaLocalidad {
   private int vendidos;
   private double totalRecaudado;
 
+  public ResumenVentaLocalidad() {}
+  public ResumenVentaLocalidad(String codigoLocalidad, int vendidos, double totalRecaudado) {
+    this.codigoLocalidad = codigoLocalidad;
+    this.vendidos = vendidos;
+    this.totalRecaudado = totalRecaudado;
+  }
+
   public String getCodigoLocalidad() {
     return codigoLocalidad;
   }

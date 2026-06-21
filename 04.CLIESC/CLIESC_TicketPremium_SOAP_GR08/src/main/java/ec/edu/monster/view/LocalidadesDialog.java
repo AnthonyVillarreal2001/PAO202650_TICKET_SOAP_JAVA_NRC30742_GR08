@@ -42,6 +42,12 @@ public class LocalidadesDialog extends JDialog {
     header.add(title, BorderLayout.NORTH);
     header.add(subtitle, BorderLayout.SOUTH);
 
+    StadiumMapPanel stadiumMapPanel = new StadiumMapPanel(partido != null ? partido.getCodigo() : "", localidades);
+
+    JPanel topPanel = new JPanel(new BorderLayout(0, 10));
+    topPanel.add(header, BorderLayout.NORTH);
+    topPanel.add(stadiumMapPanel, BorderLayout.CENTER);
+
     JPanel list = new JPanel();
     list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
 
@@ -52,7 +58,7 @@ public class LocalidadesDialog extends JDialog {
       list.add(empty);
     } else {
       for (LocalidadPartido localidad : safeLocalidades) {
-        list.add(buildCard(localidad, onComprar));
+        list.add(buildCard(localidad, onComprar, stadiumMapPanel));
         list.add(javax.swing.Box.createVerticalStrut(12));
       }
     }
@@ -65,13 +71,13 @@ public class LocalidadesDialog extends JDialog {
     JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     footer.add(volver);
 
-    root.add(header, BorderLayout.NORTH);
+    root.add(topPanel, BorderLayout.NORTH);
     root.add(scroll, BorderLayout.CENTER);
     root.add(footer, BorderLayout.SOUTH);
     setContentPane(root);
   }
 
-  private JPanel buildCard(LocalidadPartido localidad, BiConsumer<LocalidadPartido, Integer> onComprar) {
+  private JPanel buildCard(LocalidadPartido localidad, BiConsumer<LocalidadPartido, Integer> onComprar, StadiumMapPanel stadiumMapPanel) {
     JPanel card = new JPanel(new GridBagLayout()) {
       @Override protected void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
@@ -111,6 +117,9 @@ public class LocalidadesDialog extends JDialog {
     JButton comprar = new JButton("Comprar");
     comprar.addActionListener(e -> {
       if (onComprar != null) {
+        String code = localidad.getCodigoLocalidad();
+        String tipo = code.substring(code.lastIndexOf('-') + 1);
+        stadiumMapPanel.addLocalPurchase(tipo, (Integer) cantidad.getValue());
         onComprar.accept(localidad, (Integer) cantidad.getValue());
       }
     });

@@ -33,21 +33,35 @@ public class TicketPremiumWebClient {
     private TicketPremiumWebClient() {
     }
 
-    private static String getEndpoint() {
+    private static String getEndpointFederacion() {
+        return getEndpoint("soap.endpoint", "http://localhost:8080/WS_EurekaBank_Server/WSFederacion");
+    }
+
+    private static String getEndpointTicketPremium() {
+        return getEndpoint("soap.endpoint.ticketpremium", "http://localhost:8080/WS_EurekaBank_Server/WSTicketPremium");
+    }
+
+    private static String getEndpoint(String propertyKey, String defaultEndpoint) {
         try (InputStream in = TicketPremiumWebClient.class.getClassLoader().getResourceAsStream("app.properties")) {
             Properties properties = new Properties();
             if (in != null) {
                 properties.load(in);
-                return properties.getProperty("soap.endpoint", DEFAULT_ENDPOINT);
+                return properties.getProperty(propertyKey, defaultEndpoint);
             }
         } catch (Exception ex) {
             // usar valor por defecto
         }
-        return DEFAULT_ENDPOINT;
+        return defaultEndpoint;
+    }
+
+    public static boolean validarIngreso(String usuario, String password) {
+        String body = "<ws:validarIngreso><usuario>" + escapeXml(usuario) + "</usuario><password>" + escapeXml(password) + "</password></ws:validarIngreso>";
+        String response = invokeSoap(getEndpointTicketPremium(), "validarIngreso", body);
+        return response.contains("Exitoso") || response.contains("<return>Exitoso</return>");
     }
 
     public static List<PartidoFutbol> listarPartidosDisponibles() {
-        String endpoint = getEndpoint();
+        String endpoint = getEndpointFederacion();
         System.out.println("[SOAP CLIENT] Invocando listarPartidosDisponibles en: " + endpoint);
         String response = invokeSoap("listarPartidosDisponibles", "<ws:listarPartidosDisponibles/>");
         System.out.println("[SOAP CLIENT] Respuesta: " + (response.isEmpty() ? "(vacía)" : response.substring(0, Math.min(500, response.length())) + "..."));
@@ -147,6 +161,10 @@ public class TicketPremiumWebClient {
     }
 
     private static String invokeSoap(String operation, String bodyFragment) {
+        return invokeSoap(getEndpointFederacion(), operation, bodyFragment);
+    }
+
+    private static String invokeSoap(String endpoint, String operation, String bodyFragment) {
         HttpURLConnection connection = null;
         try {
             String envelope = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -155,7 +173,7 @@ public class TicketPremiumWebClient {
                     + "<soapenv:Body>" + bodyFragment + "</soapenv:Body>"
                     + "</soapenv:Envelope>";
 
-            URL url = URI.create(getEndpoint()).toURL();
+            URL url = URI.create(endpoint).toURL();
             System.out.println("[SOAP] POST a: " + url);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");

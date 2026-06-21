@@ -30,4 +30,28 @@ public class CliCon_Controlador {
     public List<ResumenVentaLocalidad> resumirVentas(String codigoPartido){
         return service.listarResumenVentas(codigoPartido);
     }
+
+    public List<ec.edu.monster.modelo.AsientoOcupado> obtenerAsientosOcupados(String codigoPartido) {
+        return service.obtenerAsientosOcupados(codigoPartido);
+    }
+
+    public List<ec.edu.monster.modelo.Cliente> listarClientes() {
+        return service.listarClientes();
+    }
+
+    public List<ec.edu.monster.modelo.Factura> listarFacturas(String idCliente) {
+        return service.listarFacturas(idCliente);
+    }
+
+    public List<ec.edu.monster.modelo.DetalleFactura> obtenerDetallesFactura(long idFactura) {
+        return service.obtenerDetallesFactura(idFactura);
+    }
+
+    public List<ec.edu.monster.modelo.Amortizacion> obtenerAmortizaciones(String idCliente) {
+        return service.obtenerAmortizaciones(idCliente);
+    }
+
+    public boolean guardarAmortizaciones(long idFactura, String idCliente, double valorLocalidades, int plazoMeses) {
+        return service.guardarAmortizaciones(idFactura, idCliente, valorLocalidades, plazoMeses);
+    }
 }

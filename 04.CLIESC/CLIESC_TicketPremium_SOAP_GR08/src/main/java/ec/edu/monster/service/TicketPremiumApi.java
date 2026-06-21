@@ -7,6 +7,7 @@ import java.util.List;
 public interface TicketPremiumApi {
   boolean validarIngreso(String usuario, String password) throws Exception;
   java.util.List<Movimiento> traerMovimientos(String cuenta) throws Exception;
+  List<ec.edu.monster.model.AsientoOcupado> obtenerAsientosOcupados(String codigoPartido) throws Exception;
   OperacionCuentaResponse regDeposito(String cuenta, double importe) throws Exception;
   OperacionCuentaResponse regRetiro(String cuenta, double importe) throws Exception;
   OperacionCuentaResponse regTransferencia(String cuentaOrigen, String cuentaDestino, double importe) throws Exception;

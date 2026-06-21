@@ -24,12 +24,28 @@ import java.util.List;
 public class TicketPremiumService {
 
     //LOGIN
-    private static final String USUARIO = "MONSTER";
-    private static final String PASSWORD = generarHash("MONSTER9");
-
     public Boolean validarIngreso(String usuario, String password) {
         String hashIngresado = generarHash(password);
-        return USUARIO.equals(usuario) && PASSWORD.equals(hashIngresado);
+        Connection cn = null;
+        try {
+            cn = AccesoDB.getConnection();
+            String sql = "SELECT * FROM USUARIOS WHERE USERNAME = ? AND PASSWORD = ?";
+            PreparedStatement pstm = cn.prepareStatement(sql);
+            pstm.setString(1, usuario);
+            pstm.setString(2, hashIngresado);
+            ResultSet rs = pstm.executeQuery();
+            boolean valid = rs.next();
+            rs.close();
+            pstm.close();
+            return valid;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (cn != null) cn.close();
+            } catch (Exception e) {}
+        }
     }
 
     /**

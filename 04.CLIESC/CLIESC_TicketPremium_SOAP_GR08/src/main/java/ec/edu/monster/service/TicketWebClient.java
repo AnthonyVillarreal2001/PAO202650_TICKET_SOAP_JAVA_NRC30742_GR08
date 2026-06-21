@@ -139,6 +139,138 @@ public final class TicketWebClient {
     return resumenes;
   }
 
+  public static List<ec.edu.monster.model.Factura> listarFacturas(String idCliente) {
+    String body = "<ws:listarFacturas><idCliente>" + escapeXml(idCliente) + "</idCliente></ws:listarFacturas>";
+    String response = invokeSoap("listarFacturas", body);
+    return parseFacturasList(response);
+  }
+
+  public static List<ec.edu.monster.model.Factura> listarTodasLasFacturas() {
+    String body = "<ws:listarTodasLasFacturas><fecha></fecha><vendedor></vendedor></ws:listarTodasLasFacturas>";
+    String response = invokeSoap("listarTodasLasFacturas", body);
+    return parseFacturasList(response);
+  }
+
+  private static List<ec.edu.monster.model.Factura> parseFacturasList(String response) {
+    List<ec.edu.monster.model.Factura> facturas = new ArrayList<>();
+    try {
+      Document document = parseXml(response);
+      NodeList nodes = document.getElementsByTagNameNS("*", "return"); // In some JAX-WS, it returns <return>
+      if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "factura");
+      for (int i = 0; i < nodes.getLength(); i++) {
+        Node node = nodes.item(i);
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+          Element element = (Element) node;
+          ec.edu.monster.model.Factura f = new ec.edu.monster.model.Factura();
+          String idStr = textOf(element, "idFactura");
+          f.setIdFactura(idStr.isBlank() ? 0 : Long.parseLong(idStr));
+          f.setIdCliente(textOf(element, "idCliente"));
+          String subStr = textOf(element, "subtotal");
+          f.setSubtotal(subStr.isBlank() ? 0 : Double.parseDouble(subStr));
+          String ivaStr = textOf(element, "iva");
+          f.setIva(ivaStr.isBlank() ? 0 : Double.parseDouble(ivaStr));
+          String totStr = textOf(element, "total");
+          f.setTotal(totStr.isBlank() ? 0 : Double.parseDouble(totStr));
+          String estStr = textOf(element, "estado");
+          f.setEstado(estStr.isBlank() ? 0 : Integer.parseInt(estStr));
+          facturas.add(f);
+        }
+      }
+    } catch (Exception ex) {
+    }
+    return facturas;
+  }
+
+  public static ec.edu.monster.model.CompraResultado comprarBoletosMultiples(String codigoPartido, String localesCsv, String cantCsv, String clienteId) {
+    ec.edu.monster.model.CompraResultado resultado = new ec.edu.monster.model.CompraResultado();
+    String body = "<ws:comprarBoletosMultiples>"
+            + "<codigoPartido>" + escapeXml(codigoPartido) + "</codigoPartido>"
+            + "<codigosLocalidades>" + escapeXml(localesCsv) + "</codigosLocalidades>"
+            + "<cantidades>" + escapeXml(cantCsv) + "</cantidades>"
+            + "<cliente>" + escapeXml(clienteId) + "</cliente>"
+            + "<vendedor>SISTEMA</vendedor>"
+            + "</ws:comprarBoletosMultiples>";
+    String response = invokeSoap("comprarBoletosMultiples", body);
+    try {
+      Document document = parseXml(response);
+      NodeList estados = document.getElementsByTagNameNS("*", "estado");
+      resultado.setEstado(estados.getLength() > 0 ? Integer.parseInt(estados.item(0).getTextContent()) : -1);
+      NodeList mensajes = document.getElementsByTagNameNS("*", "mensaje");
+      resultado.setMensaje(mensajes.getLength() > 0 ? mensajes.item(0).getTextContent() : "");
+      NodeList facturas = document.getElementsByTagNameNS("*", "facturaId");
+      resultado.setFacturaId(facturas.getLength() > 0 ? Long.parseLong(facturas.item(0).getTextContent()) : 0L);
+      NodeList totales = document.getElementsByTagNameNS("*", "total");
+      resultado.setTotal(totales.getLength() > 0 ? Double.parseDouble(totales.item(0).getTextContent()) : 0d);
+    } catch (Exception ex) {
+      resultado.setEstado(-1);
+      resultado.setMensaje("No se pudo interpretar la respuesta SOAP.");
+    }
+    return resultado;
+  }
+
+  public static List<ec.edu.monster.model.DetalleFactura> obtenerDetallesFactura(long idFactura) {
+    String body = "<ws:obtenerDetallesFactura><idFactura>" + idFactura + "</idFactura></ws:obtenerDetallesFactura>";
+    String response = invokeSoap("obtenerDetallesFactura", body);
+    List<ec.edu.monster.model.DetalleFactura> detalles = new ArrayList<>();
+    try {
+      Document document = parseXml(response);
+      NodeList nodes = document.getElementsByTagNameNS("*", "return");
+      if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "detalle");
+      for (int i = 0; i < nodes.getLength(); i++) {
+        Node node = nodes.item(i);
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+          Element e = (Element) node;
+          ec.edu.monster.model.DetalleFactura d = new ec.edu.monster.model.DetalleFactura();
+          String idStr = textOf(e, "idDetalle");
+          d.setIdDetalle(idStr.isEmpty() ? 0 : Long.parseLong(idStr));
+          d.setCodigoPartido(textOf(e, "codigoPartido"));
+          String idFStr = textOf(e, "idFactura");
+          d.setIdFactura(idFStr.isEmpty() ? 0 : Long.parseLong(idFStr));
+          d.setCodigoLocalidad(textOf(e, "codigoLocalidad"));
+          String cStr = textOf(e, "cantidad");
+          d.setCantidad(cStr.isEmpty() ? 0 : Integer.parseInt(cStr));
+          String puStr = textOf(e, "precioUnitario");
+          d.setPrecioUnitario(puStr.isEmpty() ? 0 : Double.parseDouble(puStr));
+          String totStr = textOf(e, "totalDetalle");
+          d.setTotalDetalle(totStr.isEmpty() ? 0 : Double.parseDouble(totStr));
+          detalles.add(d);
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return detalles;
+  }
+
+  public static List<ec.edu.monster.model.AsientoOcupado> obtenerAsientosOcupados(String codigoPartido) {
+    String body = "<ws:obtenerAsientosOcupados><codigoPartido>" + escapeXml(codigoPartido) + "</codigoPartido></ws:obtenerAsientosOcupados>";
+    String response = invokeSoap("obtenerAsientosOcupados", body);
+    List<ec.edu.monster.model.AsientoOcupado> asientos = new ArrayList<>();
+    try {
+      Document document = parseXml(response);
+      NodeList nodes = document.getElementsByTagNameNS("*", "return");
+      for (int i = 0; i < nodes.getLength(); i++) {
+        Node node = nodes.item(i);
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+          asientos.add(parseAsientoOcupado((Element) node));
+        }
+      }
+    } catch (Exception ex) {
+      return asientos;
+    }
+    return asientos;
+  }
+
+  private static ec.edu.monster.model.AsientoOcupado parseAsientoOcupado(Element element) {
+    ec.edu.monster.model.AsientoOcupado a = new ec.edu.monster.model.AsientoOcupado();
+    a.setLoc(textOf(element, "loc"));
+    String cant = textOf(element, "cant");
+    a.setCant(cant.isBlank() ? 0 : Integer.parseInt(cant));
+    a.setComprador(textOf(element, "comprador"));
+    a.setFecha(textOf(element, "fecha"));
+    return a;
+  }
+
   private static String invokeSoap(String operation, String bodyFragment) {
     HttpURLConnection connection = null;
     try {

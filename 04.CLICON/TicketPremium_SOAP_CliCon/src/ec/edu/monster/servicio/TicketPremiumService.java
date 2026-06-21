@@ -27,10 +27,12 @@ import org.xml.sax.InputSource;
 public class TicketPremiumService {
 
     private static final String ENDPOINT = "http://localhost:8080/WS_EurekaBank_Server/WSFederacion";
+    private static final String ENDPOINT_CRUD = "http://localhost:8080/WS_EurekaBank_Server/WSCRUD";
+    private static final String ENDPOINT_CREDITO = "http://localhost:8080/WS_EurekaBank_Server/WSCredito";
     private static final String NAMESPACE = "http://ws.monster.edu.ec/";
 
     public List<PartidoFutbol> listarPartidosDisponibles() {
-        String response = invokeSoap("listarPartidosDisponibles", "<ws:listarPartidosDisponibles/>");
+        String response = invokeSoap(ENDPOINT, "listarPartidosDisponibles", "<ws:listarPartidosDisponibles/>");
         List<PartidoFutbol> partidos = new ArrayList<>();
         try {
             Document document = parseXml(response);
@@ -49,7 +51,7 @@ public class TicketPremiumService {
 
     public List<LocalidadPartido> listarLocalidadesDisponibles(String codigoPartido) {
         String body = "<ws:listarLocalidadesDisponibles><codigoPartido>" + escapeXml(codigoPartido) + "</codigoPartido></ws:listarLocalidadesDisponibles>";
-        String response = invokeSoap("listarLocalidadesDisponibles", body);
+        String response = invokeSoap(ENDPOINT, "listarLocalidadesDisponibles", body);
         List<LocalidadPartido> localidades = new ArrayList<>();
         try {
             Document document = parseXml(response);
@@ -75,7 +77,7 @@ public class TicketPremiumService {
         body.append("<cliente>").append(escapeXml(cliente)).append("</cliente>");
         body.append("</ws:comprarBoleto>");
 
-        String response = invokeSoap("comprarBoleto", body.toString());
+        String response = invokeSoap(ENDPOINT, "comprarBoleto", body.toString());
         CompraResultado resultado = new CompraResultado();
         try {
             Document document = parseXml(response);
@@ -106,7 +108,7 @@ public class TicketPremiumService {
         } else {
             body = "<ws:listarResumenVentas/>";
         }
-        String response = invokeSoap("listarResumenVentas", body);
+        String response = invokeSoap(ENDPOINT, "listarResumenVentas", body);
         List<ResumenVentaLocalidad> resumenes = new ArrayList<>();
         try {
             Document document = parseXml(response);
@@ -123,7 +125,158 @@ public class TicketPremiumService {
         return resumenes;
     }
 
-    private static String invokeSoap(String operation, String bodyFragment) {
+    public List<ec.edu.monster.modelo.AsientoOcupado> obtenerAsientosOcupados(String codigoPartido) {
+        String body = "<ws:obtenerAsientosOcupados><codigoPartido>" + escapeXml(codigoPartido) + "</codigoPartido></ws:obtenerAsientosOcupados>";
+        String response = invokeSoap(ENDPOINT, "obtenerAsientosOcupados", body);
+        List<ec.edu.monster.modelo.AsientoOcupado> ocupados = new ArrayList<>();
+        try {
+            Document document = parseXml(response);
+            NodeList nodes = document.getElementsByTagNameNS("*", "return");
+            if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "asientoOcupado");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    ec.edu.monster.modelo.AsientoOcupado o = new ec.edu.monster.modelo.AsientoOcupado();
+                    o.setLoc(textOf((Element) node, "codigoLocalidad"));
+                    String cantStr = textOf((Element) node, "cantidad");
+                    o.setCant(cantStr.isEmpty() ? 0 : Integer.parseInt(cantStr));
+                    ocupados.add(o);
+                }
+            }
+        } catch (Exception ex) { }
+        return ocupados;
+    }
+
+    public List<ec.edu.monster.modelo.Cliente> listarClientes() {
+        String body = "<ws:listarClientes/>";
+        String response = invokeSoap(ENDPOINT_CRUD, "listarClientes", body);
+        List<ec.edu.monster.modelo.Cliente> clientes = new ArrayList<>();
+        try {
+            Document document = parseXml(response);
+            NodeList nodes = document.getElementsByTagNameNS("*", "return");
+            if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "cliente");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    ec.edu.monster.modelo.Cliente c = new ec.edu.monster.modelo.Cliente();
+                    c.setIdCliente(textOf((Element) node, "idCliente"));
+                    String nom = textOf((Element) node, "nombres");
+                    c.setNombres(nom);
+                    c.setApellidos("");
+                    boolean apto = nom.toLowerCase().contains("apto") || nom.toLowerCase().contains("apta");
+                    c.setAptoCredito(apto);
+                    clientes.add(c);
+                }
+            }
+        } catch (Exception ex) { }
+        return clientes;
+    }
+
+    public List<ec.edu.monster.modelo.Factura> listarFacturas(String idCliente) {
+        String body = "<ws:listarFacturas><idCliente>" + escapeXml(idCliente) + "</idCliente></ws:listarFacturas>";
+        String response = invokeSoap(ENDPOINT, "listarFacturas", body);
+        List<ec.edu.monster.modelo.Factura> facturas = new ArrayList<>();
+        try {
+            Document document = parseXml(response);
+            NodeList nodes = document.getElementsByTagNameNS("*", "return");
+            if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "factura");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    ec.edu.monster.modelo.Factura f = new ec.edu.monster.modelo.Factura();
+                    String idFStr = textOf((Element) node, "idFactura");
+                    f.setIdFactura(idFStr.isEmpty() ? 0 : Long.parseLong(idFStr));
+                    f.setIdCliente(textOf((Element) node, "idCliente"));
+                    f.setFechaFactura(textOf((Element) node, "fechaFactura"));
+                    String tot = textOf((Element) node, "totalFactura");
+                    f.setTotalFactura(tot.isEmpty() ? 0 : Double.parseDouble(tot));
+                    facturas.add(f);
+                }
+            }
+        } catch (Exception ex) { }
+        return facturas;
+    }
+
+    public List<ec.edu.monster.modelo.DetalleFactura> obtenerDetallesFactura(long idFactura) {
+        String body = "<ws:obtenerDetallesFactura><idFactura>" + idFactura + "</idFactura></ws:obtenerDetallesFactura>";
+        String response = invokeSoap(ENDPOINT, "obtenerDetallesFactura", body);
+        List<ec.edu.monster.modelo.DetalleFactura> detalles = new ArrayList<>();
+        try {
+            Document document = parseXml(response);
+            NodeList nodes = document.getElementsByTagNameNS("*", "return");
+            if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "detalle");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    ec.edu.monster.modelo.DetalleFactura d = new ec.edu.monster.modelo.DetalleFactura();
+                    String idStr = textOf((Element) node, "idDetalle");
+                    d.setIdDetalle(idStr.isEmpty() ? 0 : Long.parseLong(idStr));
+                    d.setCodigoPartido(textOf((Element) node, "codigoPartido"));
+                    String idFStr = textOf((Element) node, "idFactura");
+                    d.setIdFactura(idFStr.isEmpty() ? 0 : Long.parseLong(idFStr));
+                    d.setCodigoLocalidad(textOf((Element) node, "codigoLocalidad"));
+                    String cStr = textOf((Element) node, "cantidad");
+                    d.setCantidad(cStr.isEmpty() ? 0 : Integer.parseInt(cStr));
+                    String puStr = textOf((Element) node, "precioUnitario");
+                    d.setPrecioUnitario(puStr.isEmpty() ? 0 : Double.parseDouble(puStr));
+                    String totStr = textOf((Element) node, "totalDetalle");
+                    d.setTotalDetalle(totStr.isEmpty() ? 0 : Double.parseDouble(totStr));
+                    detalles.add(d);
+                }
+            }
+        } catch (Exception ex) { }
+        return detalles;
+    }
+
+    public List<ec.edu.monster.modelo.Amortizacion> obtenerAmortizaciones(String idCliente) {
+        String body = "<ws:listarAmortizaciones><idCliente>" + escapeXml(idCliente) + "</idCliente></ws:listarAmortizaciones>";
+        String response = invokeSoap(ENDPOINT_CREDITO, "listarAmortizaciones", body);
+        List<ec.edu.monster.modelo.Amortizacion> amortizaciones = new ArrayList<>();
+        try {
+            Document document = parseXml(response);
+            NodeList nodes = document.getElementsByTagNameNS("*", "return");
+            if (nodes.getLength() == 0) nodes = document.getElementsByTagNameNS("*", "amortizacion");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    ec.edu.monster.modelo.Amortizacion a = new ec.edu.monster.modelo.Amortizacion();
+                    String mStr = textOf((Element) node, "numeroCuota");
+                    a.setMes(mStr.isEmpty() ? 0 : Integer.parseInt(mStr));
+                    String cuStr = textOf((Element) node, "montoCuota");
+                    a.setCuota(cuStr.isEmpty() ? 0 : Double.parseDouble(cuStr));
+                    String iStr = textOf((Element) node, "interes");
+                    a.setInteres(iStr.isEmpty() ? 0 : Double.parseDouble(iStr));
+                    String amStr = textOf((Element) node, "capital");
+                    a.setAmortizacion(amStr.isEmpty() ? 0 : Double.parseDouble(amStr));
+                    String sStr = textOf((Element) node, "saldo");
+                    a.setSaldo(sStr.isEmpty() ? 0 : Double.parseDouble(sStr));
+                    amortizaciones.add(a);
+                }
+            }
+        } catch (Exception ex) { }
+        return amortizaciones;
+    }
+
+    public boolean guardarAmortizaciones(long idFactura, String idCliente, double valorLocalidades, int plazoMeses) {
+        String body = "<ws:guardarAmortizaciones>"
+                + "<idFactura>" + idFactura + "</idFactura>"
+                + "<idCliente>" + escapeXml(idCliente) + "</idCliente>"
+                + "<valorLocalidades>" + valorLocalidades + "</valorLocalidades>"
+                + "<plazoMeses>" + plazoMeses + "</plazoMeses>"
+                + "</ws:guardarAmortizaciones>";
+        String response = invokeSoap(ENDPOINT_CREDITO, "guardarAmortizaciones", body);
+        try {
+            Document document = parseXml(response);
+            NodeList nodes = document.getElementsByTagNameNS("*", "return");
+            if (nodes.getLength() > 0) {
+                String val = nodes.item(0).getTextContent();
+                return val.equalsIgnoreCase("true");
+            }
+        } catch (Exception ex) { }
+        return false;
+    }
+
+    private static String invokeSoap(String endpoint, String operation, String bodyFragment) {
         HttpURLConnection connection = null;
         try {
             String envelope = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -132,7 +285,7 @@ public class TicketPremiumService {
                     + "<soapenv:Body>" + bodyFragment + "</soapenv:Body>"
                     + "</soapenv:Envelope>";
 
-            URL url = URI.create(ENDPOINT).toURL();
+            URL url = URI.create(endpoint).toURL();
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);

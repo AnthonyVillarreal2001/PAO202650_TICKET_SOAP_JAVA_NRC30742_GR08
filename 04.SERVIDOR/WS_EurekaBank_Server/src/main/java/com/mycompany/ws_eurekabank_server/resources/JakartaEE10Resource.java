@@ -1,4 +1,4 @@
-package com.mycompany.ws_TicketPremium_server.resources;
+package com.mycompany.ws_eurekabank_server.resources;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

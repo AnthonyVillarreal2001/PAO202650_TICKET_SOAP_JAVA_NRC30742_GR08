@@ -23,12 +23,12 @@ public class AccesoDB {
     public static Connection getConnection() throws SQLException {
         Properties props = new Properties();
         String dbType = "mysql";
-        String host = "localhost";
+        String host = "ticketpremiun.clmuysi2e4en.us-east-2.rds.amazonaws.com";
         String port = "3306";
         String database = "bd_examen_ticket";
-        String user = "root";
-        String pass = "";
-        String useSSL = "false";
+        String user = "admin";
+        String pass = "123456789";
+        String useSSL = "true";
         String driver = "com.mysql.cj.jdbc.Driver";
         String instance = "";
 
@@ -64,7 +64,13 @@ public class AccesoDB {
                 return DriverManager.getConnection(url, user, pass);
             }
 
-            String url = String.format("jdbc:mysql://%s:%s/%s?useSSL=%s&serverTimezone=UTC", host, port, database, useSSL);
+            String url;
+            if ("true".equalsIgnoreCase(useSSL)) {
+                // Removemos la referencia al archivo PEM local para que use el TrustStore por defecto de Java
+                url = String.format("jdbc:mysql://%s:%s/%s?useSSL=true&sslMode=REQUIRED&serverTimezone=UTC", host, port, database);
+            } else {
+                url = String.format("jdbc:mysql://%s:%s/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", host, port, database);
+            }
             return DriverManager.getConnection(url, user, pass);
 
         } catch (SQLException e) {

@@ -9,6 +9,15 @@ public class PartidoFutbol {
   private Date fecha;
   private String lugar;
 
+  public PartidoFutbol() {}
+
+  public PartidoFutbol(String codigo, String equipoLocal, String equipoVisitante, Date fecha, String lugar) {
+    this.codigo = codigo;
+    this.equipoLocal = equipoLocal;
+    this.equipoVisitante = equipoVisitante;
+    this.fecha = fecha;
+    this.lugar = lugar;
+  }
   public String getCodigo() {
     return codigo;
   }

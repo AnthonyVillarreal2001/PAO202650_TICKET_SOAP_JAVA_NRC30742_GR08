@@ -63,6 +63,11 @@ public class SoapTicketPremiumApi implements TicketPremiumApi {
   }
 
   @Override
+  public List<ec.edu.monster.model.AsientoOcupado> obtenerAsientosOcupados(String codigoPartido) {
+    return TicketWebClient.obtenerAsientosOcupados(codigoPartido);
+  }
+
+  @Override
   public List<Movimiento> traerMovimientos(String cuenta) throws Exception {
     Debug.log("LLAMADA traerMovimientos(" + cuenta + ")");
     List<Movimiento> r = port().traerMovimientos(cuenta);

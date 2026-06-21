@@ -1,4 +1,4 @@
-package com.mycompany.ws_TicketPremium_server;
+package com.mycompany.ws_eurekabank_server;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;

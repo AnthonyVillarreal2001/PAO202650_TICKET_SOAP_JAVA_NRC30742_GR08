@@ -48,5 +48,29 @@ fun NavigationGraph(navController: NavHostController = rememberNavController()) 
         composable("reporte") {
             ReporteScreen(navController)
         }
+        
+        composable("crud_paises") {
+            PaisesScreen(navController)
+        }
+        
+        composable("crud_estadios") {
+            EstadiosScreen(navController)
+        }
+        
+        composable("crud_partidos") {
+            PartidosCrudScreen(navController)
+        }
+        
+        composable("crud_clientes") {
+            ClientesScreen(navController)
+        }
+        
+        composable("facturas") {
+            FacturasScreen(navController)
+        }
+        
+        composable("amortizaciones") {
+            AmortizacionesScreen(navController)
+        }
     }
 }

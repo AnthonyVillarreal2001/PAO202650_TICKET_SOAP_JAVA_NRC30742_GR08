@@ -1,0 +1,7 @@
+ec\edu\monster\modelo\ResumenVentaLocalidad.class
+ec\edu\monster\modelo\VentaRegistro.class
+ec\edu\monster\modelo\LocalidadPartido.class
+ec\edu\monster\modelo\CompraResultado.class
+ec\edu\monster\service\TicketPremiumWebClient.class
+ec\edu\monster\cliweb\controller\BoletoController.class
+ec\edu\monster\modelo\PartidoFutbol.class

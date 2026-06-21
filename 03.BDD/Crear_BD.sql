@@ -12,6 +12,16 @@ drop table if exists DETALLE_FACTURA;
 drop table if exists FACTURA;
 drop table if exists LOCALIDAD_PARTIDO;
 drop table if exists PARTIDO_FUTBOL;
+drop table if exists USUARIOS;
+drop table if exists CLIENTE;
+drop table if exists ESTADIO;
+drop table if exists PAIS;
+drop table if exists AMORTIZACION;
+drop table if exists TRANSACCION;
+drop table if exists CLIENTE_CREDITO;
+drop table if exists MOVIMIENTO;
+drop table if exists TIPOMOVIMIENTO;
+drop table if exists CUENTA;
 
 -- Volver a habilitar la revisión de claves foráneas
 SET FOREIGN_KEY_CHECKS=1;
@@ -38,6 +48,8 @@ create table FACTURA
 (
    ID_FACTURA           numeric(8,0) not null,
    CODIGO               varchar(100),
+   ID_CLIENTE           varchar(100),
+   VENDEDOR             varchar(50),
    FECHA_EMISION        datetime not null,
    SUBTOTAL             float(8,2) not null,
    IVA                  float(8,2) not null,
@@ -69,6 +81,127 @@ create table PARTIDO_FUTBOL
    LUGAR                varchar(100) not null,
    primary key (CODIGO)
 );
+
+/*==============================================================*/
+/* Table: USUARIOS                                              */
+/*==============================================================*/
+create table USUARIOS
+(
+   ID_USUARIO           int not null auto_increment,
+   USERNAME             varchar(50) not null unique,
+   PASSWORD             varchar(256) not null,
+   ROL                  varchar(50),
+   primary key (ID_USUARIO)
+);
+
+/*==============================================================*/
+/* Table: CLIENTE                                               */
+/*==============================================================*/
+create table CLIENTE
+(
+   ID_CLIENTE           varchar(100) not null,
+   NOMBRES              varchar(100) not null,
+   CORREO               varchar(100) not null,
+   TELEFONO             varchar(20),
+   EDAD                 int,
+   GENERO               varchar(1),
+   primary key (ID_CLIENTE)
+);
+
+/*==============================================================*/
+/* Table: PAIS                                                  */
+/*==============================================================*/
+create table PAIS
+(
+   ID_PAIS              varchar(100) not null,
+   NOMBRE_PAIS          varchar(100) not null,
+   primary key (ID_PAIS)
+);
+
+/*==============================================================*/
+/* Table: ESTADIO                                               */
+/*==============================================================*/
+create table ESTADIO
+(
+   ID_ESTADIO           varchar(100) not null,
+   NOMBRE_ESTADIO       varchar(100) not null,
+   CIUDAD               varchar(100) not null,
+   CAPACIDAD            numeric(8,0) not null,
+   primary key (ID_ESTADIO)
+);
+
+/*==============================================================*/
+/* Table: CLIENTE_CREDITO                                       */
+/*==============================================================*/
+create table CLIENTE_CREDITO
+(
+   ID_CLIENTE_CREDITO   varchar(100) not null,
+   HISTORIAL_FINANCIERO varchar(255) not null,
+   MONTO_MAXIMO         float(8,2) not null,
+   primary key (ID_CLIENTE_CREDITO)
+);
+
+/*==============================================================*/
+/* Table: TRANSACCION                                           */
+/*==============================================================*/
+create table TRANSACCION
+(
+   ID_TRANSACCION       int not null auto_increment,
+   ID_CLIENTE_CREDITO   varchar(100) not null,
+   TIPO_TRANSACCION     varchar(50) not null,
+   FECHA_TRANSACCION    datetime not null,
+   MONTO                float(8,2) not null,
+   primary key (ID_TRANSACCION)
+);
+
+/*==============================================================*/
+/* Table: AMORTIZACION                                          */
+/*==============================================================*/
+create table AMORTIZACION
+(
+   ID_AMORTIZACION      int not null auto_increment,
+   ID_CLIENTE_CREDITO   varchar(100) not null,
+   NUMERO_CUOTA         int not null,
+   FECHA_VENCIMIENTO    date not null,
+   MONTO_CUOTA          float(8,2) not null,
+   INTERES              float(8,2) not null,
+   CAPITAL              float(8,2) not null,
+   SALDO                float(8,2) not null,
+   ESTADO_CUOTA         varchar(50) not null,
+   primary key (ID_AMORTIZACION)
+);
+
+/*==============================================================*/
+/* Tablas Antiguas para Compatibilidad (CUENTA, MOVIMIENTO)     */
+/*==============================================================*/
+create table CUENTA
+(
+   chr_cuencodigo       varchar(14) not null,
+   dec_cuensaldo        decimal(10,2) not null,
+   int_cuencontmov      int not null,
+   vch_cuenestado       varchar(15) not null,
+   primary key (chr_cuencodigo)
+);
+
+create table TIPOMOVIMIENTO
+(
+   chr_tipocodigo       varchar(3) not null,
+   vch_tipodescripcion  varchar(40) not null,
+   vch_tipoaccion       varchar(10) not null,
+   primary key (chr_tipocodigo)
+);
+
+create table MOVIMIENTO
+(
+   chr_cuencodigo       varchar(14) not null,
+   int_movinumero       int not null,
+   dtt_movifecha        datetime not null,
+   chr_emplcodigo       varchar(4) not null,
+   chr_tipocodigo       varchar(3) not null,
+   dec_moviimporte      decimal(10,2) not null,
+   primary key (chr_cuencodigo, int_movinumero)
+);
+
 
 alter table DETALLE_FACTURA add constraint FK_APLICA_A foreign key (ID_FACTURA)
       references FACTURA (ID_FACTURA) on delete restrict on update restrict;
