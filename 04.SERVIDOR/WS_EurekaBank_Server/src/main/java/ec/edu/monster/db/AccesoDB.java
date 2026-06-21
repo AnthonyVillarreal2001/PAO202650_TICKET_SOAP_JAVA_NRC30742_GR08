@@ -28,7 +28,7 @@ public class AccesoDB {
         String database = "bd_examen_ticket";
         String user = "admin";
         String pass = "123456789";
-        String useSSL = "true";
+        String useSSL = "false";
         String driver = "com.mysql.cj.jdbc.Driver";
         String instance = "";
 
